@@ -20,6 +20,7 @@ Type=Application
 Icon=Android
 TryExec=android-tools-appimage
 Exec=android-tools-appimage %f
+NoDisplay=true
 Categories=Utility;
 Terminal=true" >> "./Android-$APP.desktop"
 
