@@ -19,8 +19,7 @@ Name=Android-platform-tools
 Type=Application
 Icon=Android
 TryExec=android-tools-appimage
-Exec=android-tools-appimage %f
-NoDisplay=true
+Exec='sh -ic "android-tools-appimage adb shell; exec bash"'
 Categories=Utility;
 Terminal=true" >> "./Android-$APP.desktop"
 
