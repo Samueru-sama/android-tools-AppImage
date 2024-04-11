@@ -63,7 +63,7 @@ chmod a+x ./appimagetool
 # Do the thing!
 ARCH=x86_64 VERSION=$(./appimagetool -v | grep -o '[[:digit:]]*') ./appimagetool -s ./$APP.AppDir && 
 ls ./*.AppImage || { echo "appimagetool failed to make the appimage"; exit 1; }
-mv ./*AppImage ./"$APPVERSION"-"platform-tools.AppImage"
+mv ./*AppImage ./"$APPVERSION"-"android-tools.AppImage"
 if [ -z "$APP" ]; then exit 1; fi # Being extra safe lol
 mv ./*.AppImage .. && cd .. && rm -rf "./$APP"
 echo "All Done!"
