@@ -34,7 +34,7 @@ cat >> ./AppRun << 'EOF'
 CURRENTDIR="$(readlink -f "$(dirname "$0")")"
 UDEVNOTICE=$(echo "If you get errors it might be because you don't have the android udev rules for your device" )
 if [ "$1" = "adb" ]; then
-	"$CURRENTDIR"/adb "${@:2}" 
+	"$CURRENTDIR"/adb "${@:2}" || echo "$UDEVNOTICE"
 	elif [ "$1" = "etc1tool" ]; then
 	"$CURRENTDIR"/etc1tool "${@:2}" || echo "$UDEVNOTICE"
 	elif [ "$1" = "fastboot" ]; then
