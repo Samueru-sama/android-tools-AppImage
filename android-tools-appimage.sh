@@ -8,7 +8,6 @@ if [ -z "$APP" ]; then exit 1; fi
 mkdir -p "./$APP/tmp" && cd "./$APP/tmp" || exit
 
 # DOWNLOAD THE ARCHIVE
-mkdir ./tmp && cd ./tmp || exit
 wget "$SITE/$APP-latest-linux.zip" && unzip -qq ./*.zip
 cd ..
 mkdir "./$APP.AppDir" && mv --backup=t ./tmp/*/* ./$APP.AppDir
@@ -66,6 +65,5 @@ ARCH=x86_64 VERSION=$(./appimagetool -v | grep -o '[[:digit:]]*') ./appimagetool
 ls ./*.AppImage || { echo "appimagetool failed to make the appimage"; exit 1; }
 mv ./*AppImage ./"$VERSION"-"platform-tools.AppImage"
 if [ -z "$APP" ]; then exit 1; fi # Being extra safe lol
-rm -rf "./$APP.AppDir" && rm ./appimagetool
-mv ./*.AppImage .. && cd .. && rm -rf "./tmp"
+mv ./*.AppImage .. && cd .. && rm -rf "./$APP"
 echo "All Done!"
