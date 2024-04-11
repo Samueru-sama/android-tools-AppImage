@@ -5,3 +5,5 @@ Turns the released binaries from here into an AppImage: [platform-tools](https:/
 
 It is possible that this appimage may fail to work with appimagelauncher, since appimagelauncher is pretty much dead I recommend this alternative: https://github.com/ivan-hc/AM
 
+You will need to install android-udev rules or similar packages, they can also be added manually. 
+
