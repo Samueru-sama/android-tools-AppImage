@@ -22,7 +22,6 @@ jobs:
         chmod a+x ./android-tools-appimage.sh
         ./android-tools-appimage.sh
         mkdir dist
-        cd ./platform-tools
         mv *AppImage dist/
 
     - name: Upload artifact
