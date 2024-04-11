@@ -14,14 +14,16 @@ mkdir "./$APP.AppDir" && mv --backup=t ./tmp/*/* ./$APP.AppDir
 cd ./$APP.AppDir || exit
 
 # DESKTOP ENTRY
-echo "[Desktop Entry]
+cat >> ./Android-$APP.desktop << 'EOF'
+[Desktop Entry]
 Name=Android-platform-tools
 Type=Application
 Icon=Android
 TryExec=android-tools-appimage
-Exec=\"'sh -ic \"android-tools-appimage adb shell\";\" exec bash\"'\"
+Exec="sh -ic 'android-tools-appimage adb shell"";"" exec bash'"
 Categories=Utility;
-Terminal=true" >> "./Android-$APP.desktop"
+Terminal=true
+EOF
 
 # GET ICON
 wget https://developer.android.com/static/images/brand/Android_Robot.png -O ./Android.png 2> /dev/null 
