@@ -1,6 +1,6 @@
 #!/bin/sh
 
-APP=platform-tools
+APP=android-tools-appimage
 SITE="https://dl.google.com/android/repository"
 
 # CREATE DIRECTORIES
@@ -18,8 +18,8 @@ echo "[Desktop Entry]
 Name=Android-platform-tools
 Type=Application
 Icon=Android
-TryExec=adb
-Exec=adb shell %f
+TryExec=android-tools-appimage
+Exec=android-tools-appimage %f
 Categories=Utility;
 Terminal=true" >> "./Android-$APP.desktop"
 
