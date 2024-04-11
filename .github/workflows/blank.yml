@@ -1,0 +1,53 @@
+name: Android Tools AppImage
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  schedule:
+    - cron: "0 16 1/2 * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: build
+      run: |
+        sudo apt update
+        sudo apt install libfuse2
+        wget https://raw.githubusercontent.com/Samueru-sama/android-tools-AppImage/main/android-tools-appimage.sh
+        chmod a+x ./android-tools-appimage.sh
+        ./android-tools-appimage.sh
+        mkdir dist
+        cd ./platform-tools
+        mv *AppImage dist/
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: Android-Tools.AppImage
+        path: 'dist'
+        
+  release:
+      needs: [build]
+      permissions: write-all
+      runs-on: ubuntu-latest
+
+      steps:
+        - uses: actions/download-artifact@v1
+          with:
+            name: Android-Tools.AppImage
+
+        - name: release
+          uses: marvinpinto/action-automatic-releases@latest
+          with:
+            title: Continuous build
+            automatic_release_tag: continuous
+            prerelease: false
+            draft: false
+            files: |
+              Android-Tools.AppImage
+            repo_token: ${{ secrets.GITHUB_TOKEN }}
