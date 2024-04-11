@@ -8,7 +8,7 @@ if [ -z "$APP" ]; then exit 1; fi
 mkdir -p "./$APP/tmp" && cd "./$APP/tmp" || exit
 
 # DOWNLOAD THE ARCHIVE
-wget "$SITE/$APP-latest-linux.zip" && unzip -qq ./*.zip
+wget "$SITE/platform-tools-latest-linux.zip" && unzip -qq ./*.zip
 cd ..
 mkdir "./$APP.AppDir" && mv --backup=t ./tmp/*/* ./$APP.AppDir
 cd ./$APP.AppDir || exit
@@ -55,7 +55,7 @@ EOF
 chmod a+x ./AppRun
 
 # MAKE APPIMAGE
-VERSION=$(cat source.properties | grep vision | awk -F = '{print $NF; exit}')
+APPVERSION=$(cat source.properties | grep vision | awk -F = '{print $NF; exit}')
 cd ..
 wget -q $(wget -q https://api.github.com/repos/probonopd/go-appimage/releases -O - | grep -v zsync | grep -i continuous | grep -i appimagetool | grep -i x86_64 | grep browser_download_url | cut -d '"' -f 4 | head -1) -O appimagetool
 chmod a+x ./appimagetool
@@ -63,7 +63,7 @@ chmod a+x ./appimagetool
 # Do the thing!
 ARCH=x86_64 VERSION=$(./appimagetool -v | grep -o '[[:digit:]]*') ./appimagetool -s ./$APP.AppDir && 
 ls ./*.AppImage || { echo "appimagetool failed to make the appimage"; exit 1; }
-mv ./*AppImage ./"$VERSION"-"platform-tools.AppImage"
+mv ./*AppImage ./"$APPVERSION"-"platform-tools.AppImage"
 if [ -z "$APP" ]; then exit 1; fi # Being extra safe lol
 mv ./*.AppImage .. && cd .. && rm -rf "./$APP"
 echo "All Done!"
