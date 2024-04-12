@@ -5,7 +5,7 @@ Turns the released binaries from here into an AppImage: [platform-tools](https:/
 
 You can also run the android-tools-appimage.sh script in your machine to make the AppImage.
 
-You will need to install android-udev rules or similar packages for your device, they can also be added manually. 
+If you are missing android udev rules you can usually get them from your distro repos or use the flag --getudev with the appimage to get install them. 
 
 It is possible that this appimage may fail to work with appimagelauncher, since appimagelauncher is pretty much dead I recommend this alternative: https://github.com/ivan-hc/AM
 
