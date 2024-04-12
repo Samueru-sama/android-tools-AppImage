@@ -51,11 +51,11 @@ if [ "$1" = "adb" ]; then
 	elif [ "$1" = "--getudev" ]; then
 	if cat /etc/udev/rules.d/*droid.rules > /dev/null; then
 		echo "udev rules already installed"
-		echo “Errors persisting with installed udev rules may be due to specific phone missing from the rules or insufficient permissions on the phone”
+		echo "Errors persisting with installed udev rules may be due to specific phone missing from the rules or insufficient permissions on the phone"
 	else
 		UDEVREPO=https://github.com/M0Rf30/android-udev-rules.git	
 		git clone $UDEVREPO
-		cd android-udev-rules
+		cd android-udev-rules || exit 1
 		chmod a+x ./install.sh
 		echo "udev rules installer from $UDEVREPO"
 		sudo ./install.sh
