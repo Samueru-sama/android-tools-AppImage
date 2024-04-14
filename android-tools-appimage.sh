@@ -10,7 +10,7 @@ mkdir -p "./$APP/tmp" && cd "./$APP/tmp" || exit
 # DOWNLOAD THE ARCHIVE
 wget "$SITE/platform-tools-latest-linux.zip" && unzip -qq ./*.zip
 cd ..
-mkdir "./$APP.AppDir" && mv --backup=t ./tmp/*/* ./$APP.AppDir
+mkdir -p "./$APP.AppDir/usr/bin" && mv --backup=t ./tmp/*/* "./$APP.AppDir/usr/bin"
 cd ./$APP.AppDir || exit
 
 # DESKTOP ENTRY
@@ -19,8 +19,7 @@ cat >> ./Android-$APP.desktop << 'EOF'
 Name=Android-platform-tools
 Type=Application
 Icon=Android
-TryExec=android-tools-appimage
-Exec="sh -ic 'android-tools-appimage adb shell"";"" exec bash'"
+Exec="sh -ic 'android-tools adb shell"";"" exec bash'"
 Categories=Utility;
 Terminal=true
 EOF
@@ -32,7 +31,7 @@ ln -s ./Android.png ./.DirIcon
 # AppRun
 cat >> ./AppRun << 'EOF'
 #!/bin/bash
-CURRENTDIR="$(readlink -f "$(dirname "$0")")"
+CURRENTDIR="$(readlink -f "$(dirname "$0")")"/usr/bin/
 UDEVNOTICE=$(echo "If you get errors it might be because of missing android udev rules, use --getudev to install them")
 if [ "$1" = "adb" ]; then
 	"$CURRENTDIR"/adb "${@:2}" || echo "$UDEVNOTICE"
@@ -65,12 +64,17 @@ else
 	echo "Error: No command specified, try \"./*tools.AppImage adb shell\" for example"
 	echo "You can also use aliases or wrapper scripts to not write ./*tools.AppImage every time"
 	echo "$UDEVNOTICE"
+	echo "Falling back to example adb shell:"
+	read -p "Do you wan to run adb shell? (y/n): " yn
+	if [[ "$yn" == [yY]* ]]; then
+		"$CURRENTDIR"/adb shell
+	fi
 fi
 EOF
 chmod a+x ./AppRun
 
 # MAKE APPIMAGE
-APPVERSION=$(cat source.properties | grep vision | awk -F = '{print $NF; exit}')
+APPVERSION=$(cat ./usr/bin/source.properties | grep vision | awk -F = '{print $NF; exit}')
 cd ..
 wget -q $(wget -q https://api.github.com/repos/probonopd/go-appimage/releases -O - | grep -v zsync | grep -i continuous | grep -i appimagetool | grep -i x86_64 | grep browser_download_url | cut -d '"' -f 4 | head -1) -O appimagetool
 chmod a+x ./appimagetool
