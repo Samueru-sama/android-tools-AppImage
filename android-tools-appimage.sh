@@ -31,7 +31,7 @@ ln -s ./Android.png ./.DirIcon
 # AppRun
 cat >> ./AppRun << 'EOF'
 #!/bin/bash
-CURRENTDIR="$(readlink -f "$(dirname "$0")")"/usr/bin/
+CURRENTDIR="$(readlink -f "$(dirname "$0")")"/usr/bin
 UDEVNOTICE=$(echo "If you get errors it might be because of missing android udev rules, use --getudev to install them")
 if [ "$1" = "adb" ]; then
 	"$CURRENTDIR"/adb "${@:2}" || echo "$UDEVNOTICE"
