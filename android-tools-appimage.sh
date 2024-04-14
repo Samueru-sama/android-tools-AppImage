@@ -19,7 +19,7 @@ cat >> ./Android-$APP.desktop << 'EOF'
 Name=Android-platform-tools
 Type=Application
 Icon=Android
-Exec="sh -ic 'android-tools "";"" $SHELL'"
+Exec="sh -ic 'android-tools"";"" \\$SHELL'"
 Categories=Utility;
 Terminal=true
 EOF
