@@ -1,17 +1,17 @@
 #!/bin/sh
 
 APP=android-tools-appimage
+APPDIR="$APP".AppDir
 SITE="https://dl.google.com/android/repository"
 
 # CREATE DIRECTORIES
 if [ -z "$APP" ]; then exit 1; fi
-mkdir -p "./$APP/tmp" && cd "./$APP/tmp" || exit
+mkdir -p "./$APP/tmp" && cd "./$APP/tmp" || exit 1
 
 # DOWNLOAD THE ARCHIVE
-wget "$SITE/platform-tools-latest-linux.zip" && unzip -qq ./*.zip
-cd ..
-mkdir -p "./$APP.AppDir/usr/bin" && mv --backup=t ./tmp/*/* "./$APP.AppDir/usr/bin"
-cd ./$APP.AppDir || exit
+wget "$SITE/platform-tools-latest-linux.zip" && unzip -qq ./*.zip && cd .. \
+&& mkdir -p "./$APP.AppDir/usr/bin" && mv --backup=t ./tmp/*/* "./$APP.AppDir/usr/bin" \
+&& cd ./"$APPDIR" || exit 1
 
 # DESKTOP ENTRY
 cat >> ./Android-$APP.desktop << 'EOF'
@@ -25,7 +25,7 @@ Terminal=true
 EOF
 
 # GET ICON
-wget https://developer.android.com/static/images/brand/Android_Robot.png -O ./Android.png 2> /dev/null 
+wget https://developer.android.com/static/images/brand/Android_Robot.png -O ./Android.png 2> /dev/null
 ln -s ./Android.png ./.DirIcon
 
 # AppRun
@@ -72,17 +72,16 @@ else
 fi
 EOF
 chmod a+x ./AppRun
+APPVERSION=$(awk -F = '/Revision/ {print $2; exit}' ./usr/bin/source.properties)
 
 # MAKE APPIMAGE
-APPVERSION=$(cat ./usr/bin/source.properties | grep vision | awk -F = '{print $NF; exit}')
 cd ..
-wget -q $(wget -q https://api.github.com/repos/probonopd/go-appimage/releases -O - | grep -v zsync | grep -i continuous | grep -i appimagetool | grep -i x86_64 | grep browser_download_url | cut -d '"' -f 4 | head -1) -O appimagetool
+APPIMAGETOOL=$(wget -q https://api.github.com/repos/probonopd/go-appimage/releases -O - | sed 's/[()",{}]/ /g; s/ /\n/g' | grep -o 'https.*continuous.*tool.*86_64.*mage$')
+wget -q "$APPIMAGETOOL" -O appimagetool
 chmod a+x ./appimagetool
 
 # Do the thing!
-ARCH=x86_64 VERSION=$(./appimagetool -v | grep -o '[[:digit:]]*') ./appimagetool -s ./$APP.AppDir && 
-ls ./*.AppImage || { echo "appimagetool failed to make the appimage"; exit 1; }
-mv ./*AppImage ./"$APPVERSION"-"android-tools.AppImage"
+ARCH=x86_64 VERSION="$APPVERSION" ./appimagetool -s ./"$APPDIR" || { echo "appimagetool failed to make the appimage"; exit 1; }
 if [ -z "$APP" ]; then exit 1; fi # Being extra safe lol
 mv ./*.AppImage .. && cd .. && rm -rf "./$APP"
 echo "All Done!"
