@@ -30,24 +30,25 @@ ln -s ./Android.png ./.DirIcon
 
 # AppRun
 cat >> ./AppRun << 'EOF'
-#!/bin/bash
+#!/bin/sh
 CURRENTDIR="$(readlink -f "$(dirname "$0")")"/usr/bin
 UDEVNOTICE=$(echo "If you get errors it might be because of missing android udev rules, use --getudev to install them")
+ARGS="$(echo "$@" | cut -f2- -d ' ')"
 export PATH="$CURRENTDIR:$PATH"
 if [ "$1" = "adb" ]; then
-	"$CURRENTDIR"/adb "${@:2}" || echo "$UDEVNOTICE"
+	"$CURRENTDIR"/adb "$ARGS" || echo "$UDEVNOTICE"
 	elif [ "$1" = "etc1tool" ]; then
-	"$CURRENTDIR"/etc1tool "${@:2}" || echo "$UDEVNOTICE"
+	"$CURRENTDIR"/etc1tool "$ARGS" || echo "$UDEVNOTICE"
 	elif [ "$1" = "fastboot" ]; then
-	"$CURRENTDIR"/fastboot "${@:2}" || echo "$UDEVNOTICE"
+	"$CURRENTDIR"/fastboot "$ARGS" || echo "$UDEVNOTICE"
 	elif [ "$1" = "make_f2fs" ]; then
-	"$CURRENTDIR"/make_f2fs "${@:2}" || echo "$UDEVNOTICE"
+	"$CURRENTDIR"/make_f2fs "$ARGS" || echo "$UDEVNOTICE"
 	elif [ "$1" = "make_f2fs_casefold" ]; then
-	"$CURRENTDIR"/make_f2fs_casefold "${@:2}" || echo "$UDEVNOTICE"
+	"$CURRENTDIR"/make_f2fs_casefold "$ARGS" || echo "$UDEVNOTICE"
 	elif [ "$1" = "mke2fs" ]; then
-	"$CURRENTDIR"/mke2fs "${@:2}" || echo "$UDEVNOTICE"
+	"$CURRENTDIR"/mke2fs "$ARGS" || echo "$UDEVNOTICE"
 	elif [ "$1" = "sqlite3" ]; then
-	"$CURRENTDIR"/sqlite3 "${@:2}" || echo "$UDEVNOTICE"
+	"$CURRENTDIR"/sqlite3 "$ARGS" || echo "$UDEVNOTICE"
 	elif [ "$1" = "--getudev" ]; then
 	if cat /etc/udev/rules.d/*droid.rules > /dev/null; then
 		echo "udev rules already installed"
@@ -67,7 +68,7 @@ else
 	echo "$UDEVNOTICE"
 	echo "Falling back to example adb shell:"
 	read -p "Do you wan to run adb shell? (y/n): " yn
-	if [[ "$yn" == [yY]* ]]; then
+	if echo "$yn" | grep -i '^y'; then
 		"$CURRENTDIR"/adb shell
 	fi
 fi
