@@ -68,7 +68,7 @@ else
 	echo "$UDEVNOTICE"
 	echo "Falling back to example adb shell:"
 	read -p "Do you wan to run adb shell? (y/n): " yn
-	if echo "$yn" | grep -i '^y'; then
+	if echo "$yn" | grep -i '^y' >/dev/null 2>&1; then
 		"$CURRENTDIR"/adb shell
 	fi
 fi
