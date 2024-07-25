@@ -32,7 +32,7 @@ ln -s ./Android.png ./.DirIcon
 cat >> ./AppRun << 'EOF'
 #!/bin/sh
 CURRENTDIR="$(dirname "$(readlink -f "$0")")"/usr/bin
-UDEVNOTICE=$(echo "If you get errors it might be because of missing android udev rules, use --getudev to install them")
+UDEVNOTICE="If you get errors it might be because of missing android udev rules, use --getudev to install them"
 ARGS="$(echo "$@" | cut -f2- -d ' ')"
 export PATH="$CURRENTDIR:$PATH"
 if [ "$1" = "adb" ]; then
@@ -54,8 +54,8 @@ if [ "$1" = "adb" ]; then
 		echo "udev rules already installed"
 		echo "Errors persisting with installed udev rules may be due to specific phone missing from the rules or insufficient permissions on the phone"
 	else
-		UDEVREPO=https://github.com/M0Rf30/android-udev-rules.git	
-		git clone $UDEVREPO
+		UDEVREPO="https://github.com/M0Rf30/android-udev-rules.git"	
+		git clone "$UDEVREPO"
 		cd android-udev-rules || exit 1
 		chmod a+x ./install.sh
 		echo "udev rules installer from $UDEVREPO"
