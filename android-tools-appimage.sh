@@ -32,46 +32,102 @@ ln -s ./Android.png ./.DirIcon
 cat >> ./AppRun << 'EOF'
 #!/bin/sh
 CURRENTDIR="$(dirname "$(readlink -f "$0")")"/usr/bin
-UDEVNOTICE="If you get errors it might be because of missing android udev rules, use --getudev to install them"
-ARGS="$(echo "$@" | cut -f2- -d ' ')"
+UDEVNOTICE='No android udev rules detected, use "--getude" to install'
+UDEVREPO="https://github.com/M0Rf30/android-udev-rules.git"
 export PATH="$CURRENTDIR:$PATH"
-if [ "$1" = "adb" ]; then
-	"$CURRENTDIR"/adb $ARGS || echo "$UDEVNOTICE"
-	elif [ "$1" = "etc1tool" ]; then
-	"$CURRENTDIR"/etc1tool $ARGS || echo "$UDEVNOTICE"
-	elif [ "$1" = "fastboot" ]; then
-	"$CURRENTDIR"/fastboot $ARGS || echo "$UDEVNOTICE"
-	elif [ "$1" = "make_f2fs" ]; then
-	"$CURRENTDIR"/make_f2fs $ARGS || echo "$UDEVNOTICE"
-	elif [ "$1" = "make_f2fs_casefold" ]; then
-	"$CURRENTDIR"/make_f2fs_casefold $ARGS || echo "$UDEVNOTICE"
-	elif [ "$1" = "mke2fs" ]; then
-	"$CURRENTDIR"/mke2fs $ARGS || echo "$UDEVNOTICE"
-	elif [ "$1" = "sqlite3" ]; then
-	"$CURRENTDIR"/sqlite3 $ARGS || echo "$UDEVNOTICE"
-	elif [ "$1" = "--getudev" ]; then
-	if cat /etc/udev/rules.d/*droid.rules > /dev/null; then
-		echo "udev rules already installed"
-		echo "Errors persisting with installed udev rules may be due to specific phone missing from the rules or insufficient permissions on the phone"
+
+_get_udev_rules() {
+	if cat /etc/udev/rules.d/*droid.rules >/dev/null 2>&1; then
+		echo "udev rules already installed!"
+		echo "Errors persisting with installed udev rules may be due to missing" 
+		echo "udev rules for device or lack of permissions from device"
+		exit 1
+	fi
+	if ! command -v git >/dev/null 2>&1; then
+		echo "ERROR: you need git to use this function"
+		exit 1
+	fi
+	if command -v sudo >/dev/null 2>&1; then
+		SUDOCMD="sudo"
+	elif command -v doas >/dev/null 2>&1; then
+		SUDOCMD="doas"
 	else
-		UDEVREPO="https://github.com/M0Rf30/android-udev-rules.git"	
-		git clone "$UDEVREPO"
-		cd android-udev-rules || exit 1
-		chmod a+x ./install.sh
-		echo "udev rules installer from $UDEVREPO"
-		sudo ./install.sh
-		cd .. && cat /etc/udev/rules.d/*droid.rules > /dev/null && rm -rf "./android-udev-rules"
+		echo "ERROR: You need sudo or doas to use this function"
+		exit 1
 	fi
-else
-	echo "Error: No command specified, try \"./*tools.AppImage adb shell\" for example"
-	echo "You can also use aliases or wrapper scripts to not write ./*tools.AppImage every time"
-	echo "$UDEVNOTICE"
-	echo "Falling back to example adb shell:"
-	read -p "Do you wan to run adb shell? (y/n): " yn
+	printf '%s' "udev rules installer from $UDEVREPO, run installer? (y/N): "
+	read -r yn
 	if echo "$yn" | grep -i '^y' >/dev/null 2>&1; then
-		"$CURRENTDIR"/adb shell
+		tmpudev=".udev_rules_tmp.dir"
+		git clone "$UDEVREPO" "$tmpudev" && cd "$tmpudev" || exit 1
+		chmod +x ./install.sh && "$SUDOCMD" ./install.sh
+		cat /etc/udev/rules.d/*droid.rules >/dev/null 2>&1 || exit 1
+		cd .. && rm -rf "$tmpudev" || exit 1
+		echo "udev rules installed successfully!"
+	else
+		echo "Aborting..."
+		exit 1
 	fi
-fi
+}
+
+_get_symlinks() {
+	BINDIR="${XDG_BIN_HOME:-$HOME/.local/bin}"
+	links="adb etc1tool fastboot make_f2fs make_f2fs_casefold mke2fs sqlite3"
+	echo ""
+	echo "This function will make wrapper symlinks in $BINDIR"
+	echo "that will point to $APPIMAGE"
+	echo ""
+	echo "with the names: \"$links\""
+	echo ""
+	echo "Make sure there are not existing files $BINDIR with those names"
+	printf '\n%s' "Proceed with the symlink creation? (Y/n): " 
+	read -r yn
+	if echo "$yn" | grep -i '^n' >/dev/null 2>&1; then
+		echo "Aborting..."
+		exit 1
+	fi
+	mkdir -p "$BINDIR" || exit 1
+	for link in $links; do
+			ln -s "$APPIMAGE" "$BINDIR/$link" 2>/dev/null \
+				&& echo "\"$link\" symlink successfully created in \"$BINDIR\""
+	done
+}
+
+# logic
+case $ARGV0 in
+	'adb'|'etc1tool'|'fastboot'|'make_f2fs'|\
+	'make_f2fs_casefold'|'mke2fs'|'sqlite3')
+		"$CURRENTDIR/$ARGV0" "$@" || echo "$UDEVNOTICE"
+		;;
+	*)
+		case $1 in
+		'adb'|'etc1tool'|'fastboot'|'make_f2fs'|\
+		'make_f2fs_casefold'|'mke2fs'|'sqlite3')
+			option="$1"
+			shift
+			"$CURRENTDIR/$option" "$@" || echo "$UDEVNOTICE"
+			;;
+		'--getudev')
+			_get_udev_rules
+			;;
+		'--getlinks')
+			_get_symlinks
+			;;
+		*)
+			echo ""
+			echo "USAGE: \"${APPIMAGE##*/} [ARGUMENT]\""
+			echo "EXAMPLE: \"${APPIMAGE##*/} adb shell\" to enter adb shell" 
+			echo ""
+			echo "You can also make a symlink to $APPIMAGE named adb"
+			echo "and run the symlink to enter adb without typing ${APPIMAGE##*/}"
+			echo ""
+			echo 'use "--getlinks" if you want to make the symlinks automatically'
+			echo ""
+			exit 1
+			;;
+		esac
+	;;
+esac
 EOF
 chmod a+x ./AppRun
 APPVERSION=$(awk -F = '/Revision/ {print $2; exit}' ./usr/bin/source.properties)
