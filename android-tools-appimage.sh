@@ -1,19 +1,19 @@
 #!/bin/sh
 
+export ARCH=x86_64
 APP=android-tools-appimage
 APPDIR="$APP".AppDir
-SITE="https://dl.google.com/android/repository"
+SITE="https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
+ICON="https://developer.android.com/static/images/brand/Android_Robot.png"
+APPIMAGETOOL=$(wget -q https://api.github.com/repos/probonopd/go-appimage/releases -O - | sed 's/[()",{}]/ /g; s/ /\n/g' | grep -o 'https.*continuous.*tool.*86_64.*mage$')
 
-# CREATE DIRECTORIES
-if [ -z "$APP" ]; then exit 1; fi
-mkdir -p "./$APP/tmp" && cd "./$APP/tmp" || exit 1
+# CREATE DIRECTORIES AND DOWNLOAD THE ARCHIVE
+[ -n "$APP" ] || exit 1
+mkdir -p ./"$APP"/"$APPDIR"/usr && cd ./"$APP"/"$APPDIR"/usr || exit 1
+wget "$SITE" && unzip -q *.zip && rm -f ./*.zip || exit 1
+mv ./platform-* ./bin && cd .. || exit 1
 
-# DOWNLOAD THE ARCHIVE
-wget "$SITE/platform-tools-latest-linux.zip" && unzip -qq ./*.zip && cd .. \
-&& mkdir -p "./$APP.AppDir/usr/bin" && mv --backup=t ./tmp/*/* "./$APP.AppDir/usr/bin" \
-&& cd ./"$APPDIR" || exit 1
-
-# DESKTOP ENTRY
+# DESKTOP & ICON
 cat >> ./Android-$APP.desktop << 'EOF'
 [Desktop Entry]
 Name=Android-platform-tools
@@ -23,10 +23,7 @@ Exec="sh -ic ' android-tools "";"" \\$SHELL'"
 Categories=Utility;
 Terminal=true
 EOF
-
-# GET ICON
-wget https://developer.android.com/static/images/brand/Android_Robot.png -O ./Android.png 2> /dev/null
-ln -s ./Android.png ./.DirIcon
+wget "$ICON" -O ./Android.png && ln -s ./Android.png ./.DirIcon
 
 # AppRun
 cat >> ./AppRun << 'EOF'
@@ -36,6 +33,7 @@ UDEVNOTICE='No android udev rules detected, use "--getudev" to install'
 UDEVREPO="https://github.com/M0Rf30/android-udev-rules.git"
 export PATH="$CURRENTDIR:$PATH"
 cat /etc/udev/rules.d/*droid.rules >/dev/null 2>&1 && UDEVNOTICE=""
+ARGV0="${ARGV0#./}"
 
 _get_udev_rules() {
 	if cat /etc/udev/rules.d/*droid.rules >/dev/null 2>&1; then
@@ -130,16 +128,10 @@ case $ARGV0 in
 esac
 EOF
 chmod a+x ./AppRun
-APPVERSION=$(awk -F = '/Revision/ {print $2; exit}' ./usr/bin/source.properties)
-
-# MAKE APPIMAGE
-cd ..
-APPIMAGETOOL=$(wget -q https://api.github.com/repos/probonopd/go-appimage/releases -O - | sed 's/[()",{}]/ /g; s/ /\n/g' | grep -o 'https.*continuous.*tool.*86_64.*mage$')
-wget -q "$APPIMAGETOOL" -O appimagetool
-chmod a+x ./appimagetool
+export VERSION="$(awk -F"=" '/vision/ {print $2}' ./usr/bin/source.properties)"
 
 # Do the thing!
-ARCH=x86_64 VERSION="$APPVERSION" ./appimagetool -s ./"$APPDIR" || { echo "appimagetool failed to make the appimage"; exit 1; }
-if [ -z "$APP" ]; then exit 1; fi # Being extra safe lol
-mv ./*.AppImage .. && cd .. && rm -rf "./$APP"
+cd .. && wget -q "$APPIMAGETOOL" -O appimagetool && chmod +x ./appimagetool
+./appimagetool -s ./"$APPDIR" || exit 1
+[ -n "$APP" ] && mv ./*.AppImage .. && cd .. && rm -rf "$APP" || exit 1
 echo "All Done!"
