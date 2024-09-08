@@ -35,6 +35,7 @@ CURRENTDIR="$(dirname "$(readlink -f "$0")")"/usr/bin
 UDEVNOTICE='No android udev rules detected, use "--getudev" to install'
 UDEVREPO="https://github.com/M0Rf30/android-udev-rules.git"
 export PATH="$CURRENTDIR:$PATH"
+cat /etc/udev/rules.d/*droid.rules >/dev/null 2>&1 && UDEVNOTICE=""
 
 _get_udev_rules() {
 	if cat /etc/udev/rules.d/*droid.rules >/dev/null 2>&1; then
