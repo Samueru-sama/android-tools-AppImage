@@ -32,13 +32,13 @@ ln -s ./Android.png ./.DirIcon
 cat >> ./AppRun << 'EOF'
 #!/bin/sh
 CURRENTDIR="$(dirname "$(readlink -f "$0")")"/usr/bin
-UDEVNOTICE='No android udev rules detected, use "--getude" to install'
+UDEVNOTICE='No android udev rules detected, use "--getudev" to install'
 UDEVREPO="https://github.com/M0Rf30/android-udev-rules.git"
 export PATH="$CURRENTDIR:$PATH"
 
 _get_udev_rules() {
 	if cat /etc/udev/rules.d/*droid.rules >/dev/null 2>&1; then
-		echo "udev rules already installed!"
+		echo "ERROR: udev rules are already installed!"
 		echo "Errors persisting with installed udev rules may be due to missing" 
 		echo "udev rules for device or lack of permissions from device"
 		exit 1
@@ -76,7 +76,6 @@ _get_symlinks() {
 	echo ""
 	echo "This function will make wrapper symlinks in $BINDIR"
 	echo "that will point to $APPIMAGE"
-	echo ""
 	echo "with the names: \"$links\""
 	echo ""
 	echo "Make sure there are not existing files $BINDIR with those names"
