@@ -31,9 +31,9 @@ cat >> ./AppRun << 'EOF'
 CURRENTDIR="$(dirname "$(readlink -f "$0")")"/usr/bin
 UDEVNOTICE='No android udev rules detected, use "--getudev" to install'
 UDEVREPO="https://github.com/M0Rf30/android-udev-rules.git"
-export PATH="$CURRENTDIR:$PATH"
 cat /etc/udev/rules.d/*droid.rules >/dev/null 2>&1 && UDEVNOTICE=""
 ARGV0="${ARGV0#./}"
+export PATH="$CURRENTDIR:$PATH"
 
 _get_udev_rules() {
 	if cat /etc/udev/rules.d/*droid.rules >/dev/null 2>&1; then
@@ -71,11 +71,11 @@ _get_udev_rules() {
 
 _get_symlinks() {
 	BINDIR="${XDG_BIN_HOME:-$HOME/.local/bin}"
-	links="adb etc1tool fastboot make_f2fs make_f2fs_casefold mke2fs sqlite3"
+	links="adb etc1tool fastboot hprof-conv make_f2fs make_f2fs_casefold mke2fs sqlite3"
 	echo ""
 	echo "This function will make wrapper symlinks in $BINDIR"
-	echo "that will point to $APPIMAGE"
-	echo "with the names: \"$links\""
+	echo "that will point to $APPIMAGE with the names:"
+	echo "$links" | tr ' ' '\n'
 	echo ""
 	echo "Make sure there are not existing files $BINDIR with those names"
 	printf '\n%s' "Proceed with the symlink creation? (Y/n): " 
@@ -93,14 +93,14 @@ _get_symlinks() {
 
 # logic
 case $ARGV0 in
-	'adb'|'etc1tool'|'fastboot'|'make_f2fs'|\
-	'make_f2fs_casefold'|'mke2fs'|'sqlite3')
+	'adb'|'etc1tool'|'fastboot'|'hprof-conv'|\
+	'make_f2fs'|'make_f2fs_casefold'|'mke2fs'|'sqlite3')
 		"$CURRENTDIR/$ARGV0" "$@" || echo "$UDEVNOTICE"
 		;;
 	*)
 		case $1 in
-		'adb'|'etc1tool'|'fastboot'|'make_f2fs'|\
-		'make_f2fs_casefold'|'mke2fs'|'sqlite3')
+		'adb'|'etc1tool'|'fastboot'|'hprof-conv'|\
+		'make_f2fs'|'make_f2fs_casefold'|'mke2fs'|'sqlite3')
 			option="$1"
 			shift
 			"$CURRENTDIR/$option" "$@" || echo "$UDEVNOTICE"
