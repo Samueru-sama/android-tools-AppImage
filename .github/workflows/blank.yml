@@ -5,7 +5,7 @@ concurrency:
 
 on:
   schedule:
-    - cron: "0 16 1/2 * *"
+    - cron: "0 16 1/15 * *"
   workflow_dispatch:
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
     - name: build
       run: |
         sudo apt update
-        sudo apt install libfuse2
+        sudo apt install libfuse2 desktop-file-utils
         wget https://raw.githubusercontent.com/Samueru-sama/android-tools-AppImage/main/android-tools-appimage.sh
         chmod a+x ./android-tools-appimage.sh
         ./android-tools-appimage.sh
@@ -25,7 +25,7 @@ jobs:
         mv *AppImage dist/
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v3
       with:
         name: Android-Tools.AppImage
         path: 'dist'
@@ -36,7 +36,7 @@ jobs:
       runs-on: ubuntu-latest
 
       steps:
-        - uses: actions/download-artifact@v1
+        - uses: actions/download-artifact@v3
           with:
             name: Android-Tools.AppImage
 
