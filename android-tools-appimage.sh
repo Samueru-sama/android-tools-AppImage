@@ -5,7 +5,7 @@ APP=android-tools-appimage
 APPDIR="$APP".AppDir
 SITE="https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
 ICON="https://developer.android.com/static/images/brand/Android_Robot.png"
-APPIMAGETOOL=$(wget -q https://api.github.com/repos/probonopd/go-appimage/releases -O - | sed 's/[()",{}]/ /g; s/ /\n/g' | grep -o 'https.*continuous.*tool.*86_64.*mage$')
+APPIMAGETOOL="https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
 
 # CREATE DIRECTORIES AND DOWNLOAD THE ARCHIVE
 [ -n "$APP" ] || exit 1
@@ -132,6 +132,6 @@ export VERSION="$(awk -F"=" '/vision/ {print $2}' ./usr/bin/source.properties)"
 
 # Do the thing!
 cd .. && wget -q "$APPIMAGETOOL" -O appimagetool && chmod +x ./appimagetool
-./appimagetool -s ./"$APPDIR" || exit 1
+./appimagetool --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 22 ./"$APPDIR" || exit 1
 [ -n "$APP" ] && mv ./*.AppImage .. && cd .. && rm -rf "$APP" || exit 1
 echo "All Done!"
