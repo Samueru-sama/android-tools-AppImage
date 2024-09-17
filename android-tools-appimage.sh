@@ -92,7 +92,7 @@ _get_symlinks() {
 }
 
 # logic
-case $ARGV0 in
+case "$ARGV0" in
 	'adb'|'etc1tool'|'fastboot'|'hprof-conv'|\
 	'make_f2fs'|'make_f2fs_casefold'|'mke2fs'|'sqlite3')
 		"$CURRENTDIR/$ARGV0" "$@" || echo "$UDEVNOTICE"
