@@ -1,7 +1,7 @@
 # android-tools-AppImage
-Unofficial AppImage of Android Platform Tools (adb, fastboot, etc). 
+Unofficial AppImage of Android Platform Tools (adb, fastboot, etc), uses the official [binaries](https://developer.android.com/tools/releases/platform-tools) and turns them into an AppImage.
 
-Turns the released binaries from here into an AppImage: [platform-tools](https://developer.android.com/tools/releases/platform-tools)
+**This AppImage bundles everything and should work on any linux distro, even on musl based ones.**
 
 You can also run the android-tools-appimage.sh script in your machine to make the AppImage.
 
